@@ -1,0 +1,40 @@
+services:
+  api:
+    build: .
+    container_name: crypto_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/crypto
+      - REDIS_HOST=redis
+      - REDIS_PORT=6381
+    volumes:
+      - ./app:/app/app
+    restart: always
+
+  db:
+    image: postgres:16
+    container_name: crypto_postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=crypto
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: crypto_redis
+    ports:
+      - "6381:6381"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

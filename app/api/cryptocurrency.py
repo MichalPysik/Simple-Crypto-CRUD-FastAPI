@@ -1,0 +1,1 @@
+# API endpoints related to cryptocurrencies will be here

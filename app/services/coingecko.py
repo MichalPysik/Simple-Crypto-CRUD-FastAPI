@@ -1,0 +1,1 @@
+# API calls to CoinGecko will be handled here

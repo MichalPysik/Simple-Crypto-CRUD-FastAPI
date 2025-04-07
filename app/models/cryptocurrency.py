@@ -1,0 +1,1 @@
+# The database models for the cryptocurrencies will be here

@@ -1,0 +1,1 @@
+# Pydantic schemas for cryptocurrencies will be here
