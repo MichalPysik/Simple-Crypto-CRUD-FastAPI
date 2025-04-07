@@ -2,3 +2,7 @@ fastapi
 uvicorn
 pydantic
 pydantic-settings
+sqlalchemy
+httpx
+psycopg2
+
