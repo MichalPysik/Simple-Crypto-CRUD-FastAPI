@@ -12,6 +12,7 @@ class Cryptocurrency(Base):
     id = Column(Integer, primary_key=True, index=True)
     symbol = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
+    amount = Column(Float, default=0.0)  # Amount of cryptocurrency owned
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     # Updates when metadata is updated or when the name is changed
@@ -19,7 +20,7 @@ class Cryptocurrency(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    # 'metadata' name is reserved in SQLAlchemy
+    # name 'metadata' is reserved in SQLAlchemy
     crypto_metadata = relationship(
         "CryptocurrencyMetadata", back_populates="cryptocurrency", uselist=False
     )
@@ -38,6 +39,8 @@ class CryptocurrencyMetadata(Base):
     market_cap_rank = Column(Integer)
 
     coingecko_id = Column(String)
-    metadata_timestamp = Column(DateTime(timezone=True)) # Value fetched from Coingecko API
+    metadata_timestamp = Column(
+        DateTime(timezone=True)
+    )  # Value fetched from Coingecko API
 
     cryptocurrency = relationship("Cryptocurrency", back_populates="crypto_metadata")

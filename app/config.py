@@ -23,7 +23,6 @@ class Settings(BaseSettings):
 
     # CoinGecko API settings
     COINGECKO_API_URL: str = "https://api.coingecko.com/api/v3"
-    COINGECKO_API_KEY: str = "ENTER_API_KEY_HERE"
 
     @property
     def get_database_url(self) -> str:

@@ -4,12 +4,11 @@ import sys
 from fastapi import FastAPI
 from sqlalchemy import inspect
 
-from app.config import settings
-from app.db import Base, engine
-from app.api import router as api_router
-
 # Ensure that the models are imported so that the tables are created correctly
 import app.models
+from app.api import router as api_router
+from app.config import settings
+from app.db import Base, engine
 
 app = FastAPI()
 
