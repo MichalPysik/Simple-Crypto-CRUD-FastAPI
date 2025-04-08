@@ -9,6 +9,8 @@ import app.models
 from app.api import router as api_router
 from app.config import settings
 from app.db import Base, engine
+from app.tasks.crypto_tasks import refresh_all_cryptocurrencies_metadata
+from app.tasks.scheduler import schedule_periodic_task, start_scheduler
 
 app = FastAPI()
 
@@ -49,6 +51,21 @@ async def initialize_db():
         Base.metadata.create_all(bind=engine)
     else:
         logging.info("Database tables already exist.")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Start the scheduler for periodic tasks.
+    """
+    start_scheduler()
+    # Schedule the task to refresh all cryptocurrencies metadata every REFRESH_INTERVAL_MINUTES
+    schedule_periodic_task(
+        func=refresh_all_cryptocurrencies_metadata,
+        interval_minutes=settings.REFRESH_INTERVAL_MINUTES,
+        id="refresh_all_crypto_metadata",
+        name="Refresh all cryptocurrencies metadata",
+    )
 
 
 @app.get("/")

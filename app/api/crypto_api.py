@@ -9,6 +9,8 @@ import app.schemas as schemas
 from app.db import get_db
 from app.services.coingecko import get_coin_metadata, validate_crypto_symbol
 from app.services.redis import *
+from app.tasks.crypto_tasks import \
+    refresh_all_cryptocurrencies_metadata as refresh_all_task
 
 router = APIRouter(prefix="/api")
 
@@ -106,7 +108,7 @@ def update_cryptocurrency(
     return updated_crypto
 
 
-@router.delete("/cryptocurrencies/{symbol}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/cryptocurrency/{symbol}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_cryptocurrency(symbol: str, db: Session = Depends(get_db)):
     """
     Delete a specific cryptocurrency by its symbol.
@@ -120,7 +122,7 @@ def delete_cryptocurrency(symbol: str, db: Session = Depends(get_db)):
 
 
 @router.post(
-    "/cryptocurrencies/{symbol}/refresh", response_model=schemas.CryptocurrencyResponse
+    "/cryptocurrency/{symbol}/refresh", response_model=schemas.CryptocurrencyResponse
 )
 async def refresh_cryptocurrency_metadata(symbol: str, db: Session = Depends(get_db)):
     """
@@ -151,32 +153,11 @@ async def refresh_cryptocurrency_metadata(symbol: str, db: Session = Depends(get
     return updated_crypto
 
 
-@router.post(
-    "/cryptocurrencies/refresh-all", response_model=List[schemas.CryptocurrencyResponse]
-)
-async def refresh_all_cryptocurrencies_metada(db: Session = Depends(get_db)):
+@router.post("/cryptocurrencies/refresh")
+async def refresh_all_cryptocurrencies_metadata():
     """
-    Refresh the data of all cryptocurrencies.
+    Manually trigger a refresh of the data of all cryptocurrencies.
+    This operation is also performed automatically every 30 minutes.
     """
-    # Get all cryptocurrencies from the database
-    all_cryptos = crud.get_all_cryptocurrencies(session=db)
-
-    response_list = []
-    for i, crypto in enumerate(all_cryptos):
-        # Fetch metadata from CoinGecko
-        new_metadata = await get_coin_metadata(crypto.crypto_metadata.coingecko_id)
-
-        # Update the metadata in the database (and update the cache)
-        updated_crypto = crud.update_cryptocurrency_metadata(
-            session=db, symbol=crypto.symbol, new_metadata=new_metadata
-        )
-        if check_crypto_in_cache(crypto.symbol):
-            delete_crypto_from_cache(crypto.symbol)
-        insert_crypto_to_cache(symbol=crypto.symbol, model=updated_crypto)
-
-        response_list.append(updated_crypto)
-        logger.info(
-            f"Updated metadata for '{crypto.symbol}', progress: {i + 1}/{len(all_cryptos)}"
-        )
-
-    return response_list
+    await refresh_all_task()
+    return {"message": "Manual refresh of all currencies metadata has finished."}

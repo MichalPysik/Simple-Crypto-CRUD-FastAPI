@@ -6,3 +6,4 @@ sqlalchemy
 httpx
 psycopg2
 redis
+APScheduler

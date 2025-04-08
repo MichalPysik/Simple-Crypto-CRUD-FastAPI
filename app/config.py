@@ -19,10 +19,10 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6381
     REDIS_DB: int = 0
-    REDIS_PASSWORD: Optional[str] = None
 
     # CoinGecko API settings
     COINGECKO_API_URL: str = "https://api.coingecko.com/api/v3"
+    REFRESH_INTERVAL_MINUTES: int = 5  # Automatic refresh interval for all metadata
 
     @property
     def get_database_url(self) -> str:
